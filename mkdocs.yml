@@ -43,3 +43,7 @@ markdown_extensions:
 
 nav:
   - 首页: index.md
+  - PYNQnoob:
+      - 系列总览: fz3b/index.md
+      - 移植篇(一) 从头编译 PYNQ v3.1.2 镜像: fz3b/01-build-image.md
+      - 移植篇(二) 刷写镜像与首次点亮: fz3b/02-flash-and-boot.md
