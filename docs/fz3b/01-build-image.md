@@ -3,7 +3,7 @@
 ## 0. 写在前面
 
 **读者画像**：这是一篇写给像我一样的在校本科生和实验室萌新的"从头编译 PYNQ v3.1.2 镜像"的教程。由于从Windows宿主机上的环境配置开始讲起，所以会略显絮叨，有经验的读者仅作参考。
-本教程适合初次接触 Xilinx Zynq FPGA 板卡，无任何硬件开发与调试经验的在校学生（因为后续一些问题的解决方案需要依托学校和实验室的源），你需要的基础只有：
+本教程适合初次接触 Xilinx Zynq FPGA 板卡，无任何硬件开发与调试经验的在校学生（因为后续一些问题的解决方案需要依托学校和实验室的资源），你需要的基础只有：
 
 - 会使用 powershell 等命令行工具
 - 能使用简单的 git 命令，有一个自己的 GitHub 账号
@@ -163,7 +163,7 @@ source ~/tools/Xilinx/Vitis/2024.1/settings64.sh
 vitis --version                                     
 ```
 
-![bash 验证](assets\1\install-steps\成功.png)
+![bash 验证](assets/1/install-steps/成功.png)
 
 ## 5. 安装 PetaLinux 2024.1（进 WSL2）
 
@@ -192,7 +192,7 @@ chmod +x ~/downloads/petalinux-v2024.1-05202009-installer.run
 
 一般新装的 WSL Ubuntu 24.04 都会遇到的问题，详情见[PetaLinux 2024.1安装笔记](https://developer.aliyun.com/article/1592251)：
 
-![缺库](assets\1\install-steps\缺库.png)
+![缺库](assets/1/install-steps/缺库.png)
 
 补装
 
@@ -449,7 +449,7 @@ arp -a | findstr 192.168.137
 ```
 
 然后浏览器输入 192.168.137.x (除去 .1 和 .255 后剩下的那个)，密码为 `xilinx`
-![jupyter登录页](assets\1\built-steps\jupyter.png)
+![jupyter登录页](assets/1/built-steps/jupyter.png)
 刷写 `.img` 后，刷写与首次点亮见**移植篇(二)**。与原作者预编译镜像（PYNQ v3.0.1，PetaLinux 2022.1 时代）的差异：内核与工具链代差（2022.1 → 2024.1）、PYNQ Python API 层面保持兼容，后续教程两者通用。
 
 ## 9. 验证之后
@@ -469,7 +469,7 @@ Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss |
 ```
 
 结果be like，vhdx 就在 BasePath\ext4.vhdx:
-![我本机的运行结果](assets\1\disk-steps\查看虚拟磁盘位置.png)
+![我本机的运行结果](assets/1/disk-steps/查看虚拟磁盘位置.png)
 
 ## 10. 踩坑实录（现象 → 根因 → 最小修复）
 
@@ -545,10 +545,10 @@ NOTICE:  BL31: v2.10.0  (release):v1.1-13187-g4f82b6134
 NOTICE:  BL31: Built : 04:45:53, Mar 12 2024
 ```
 
-**根因**：FZ3B 的调试串口接 **PS_UART1**（[官方手册 USB_UART 接口表](https://ai.baidu.com/ai-doc/HWCE/nkq9b5ncu#%E5%8D%81%E3%80%81usb_uart%E6%8E%A5%E5%8F%A3)：MIO24/25），而 BSP 自动生成的串口配置为 FSBL/PMU/内核 = UART0、TF-A = UART1——只有 TF-A 的输出
-接对了线，U-Boot 与内核则在向未接线的 UART0 输出。
-**出处**：分裂配置在构建生成的
-`petalinux_project/project-spec/configs/config`（TF-A=UART1，其余=UART0）——由 PetaLinux 2024.1 模板自动生成；changhai0109 分发的板卡文件不含该配置文件（仓库里只有 spec/XSA/BSP dtsi/boot_leds），故非其分发物之过，而是模板默认值与 FZ3B 接线的错位。
+复位多次结果完全一致——确定性失败，非偶发。两个防跑偏提示：①三行 BL31 说明 FSBL/BL31 已经跑起来了、SD 启动模式也对——板子没砖；②PC 与板卡的链路灯是亮的（PHY 协商在硬件层完成），别被"网线是通的"带偏去查物理层。
+
+**根因**：FZ3B 的调试串口接 **PS_UART1**（[官方手册 USB_UART 接口表](https://ai.baidu.com/ai-doc/HWCE/nkq9b5ncu#%E5%8D%81%E3%80%81usb_uart%E6%8E%A5%E5%8F%A3)：MIO24/25），而 BSP 自动生成的串口配置为 FSBL/PMU/内核 = UART0、TF-A = UART1——只有 TF-A 的输出接对了线，U-Boot 与内核则在向未接线的 UART0 输出。
+**出处**：分裂配置在构建生成的 `petalinux_project/project-spec/configs/config`（TF-A=UART1，其余=UART0）——由 PetaLinux 2024.1 模板自动生成；changhai0109 分发的板卡文件不含该配置文件（仓库里只有 spec/XSA/BSP dtsi/boot_leds），故非其分发物之过，而是模板默认值与 FZ3B 接线的错位。
 **修复**：§6.2 的 `system-user.dtsi` 修改方案已把内核控制台锁定为 `console=ttyPS0`（接线正确的那颗）；FSBL/PMU 的输出可见性按需执行下面的串口三连 sed（只影响日志观感，不影响功能；该 sed 必须在首次 make 生成配置文件之后执行，改完重跑 make）：
 
 ```bash
@@ -567,11 +567,8 @@ sed -i \
 ### 坑 7：首启 root 挂载 panic——root= 指向了 eMMC
 
 **现象**：串口可见性修复（坑 6）后，内核日志出现，但
-`Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(179,10)`，`No filesystem could mount root, tried: ext4`，且无任何
-`EXT4-fs` / `I/O error` 行。
-**根因**：FZ3B 是 eMMC + TF 卡双存储板，枚举结果 eMMC = `mmcblk0`、TF 卡 =
-`mmcblk1`。模板默认 bootargs 为 `root=/dev/mmcblk0p2`——指向 **eMMC 里的出厂分区**
-（非 ext4），而不是 TF 卡上的 PYNQ rootfs。
+`Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(179,10)`，`No filesystem could mount root, tried: ext4`，且无任何 `EXT4-fs` / `I/O error` 行。
+**根因**：FZ3B 是 eMMC + TF 卡双存储板，枚举结果 eMMC = `mmcblk0`、TF 卡 = `mmcblk1`。模板默认 bootargs 为 `root=/dev/mmcblk0p2`——指向 **eMMC 里的出厂分区**（非 ext4），而不是 TF 卡上的 PYNQ rootfs。
 **出处**：PYNQ 官方 `sdbuild/boot/meta-pynq/.../pynq_bootargs.dtsi` 的默认
 `root=/dev/mmcblk0p2`（假定 root 在首个 mmc 设备上）；`@changhai0109` 分发的
 `system-user.dtsi` 不涉及此文件（其原版仅含 sdhci1 修复）。
