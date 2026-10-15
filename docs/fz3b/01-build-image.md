@@ -113,7 +113,7 @@ Best regards,
 
 进入[vivado 2024.1 下载页面](https://www.amd.com/zh-cn/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-1.html)后，若校园网稳定，推荐 Web Installer，Linux 版
 
-![AMD 官网 2024.1 安装包下载页面](assets/1/install-steps/官网安装包.png)
+![AMD 官网 2024.1 下载页面：选 Web Installer，Linux 版](assets/1/install-steps/官网安装包.png)
 
 ### Web Installer 还是完整安装包？
 
@@ -142,14 +142,14 @@ chmod +x ~/downloads/FPGAs_AdaptiveSoCs_Unified_2024.1_0522_2023_Lin64.bin
 图形向导关键步骤：
 
 **step1.** 弹出 `A Newer Verion Is Available` 框时，选 `Continue`；
-![AMD 官网 2024.1 安装包下载页面](assets/1/install-steps/不要新版.png)
+![安装向导弹出 A Newer Version Is Available，选 Continue](assets/1/install-steps/不要新版.png)
 **step2.** 选 Download and Install Now，账号和密码填你表单上上交的那个；
-![AMD 官网 2024.1 安装包下载页面](assets/1/install-steps/选按需安装.png)
+![安装向导：选 Download and Install Now，填写 AMD 账号密码](assets/1/install-steps/选按需安装.png)
 **step3.** Install Type：**Vitis**（统一安装器，Vivado 会一并装入）；
 勾选器件族时**只留 Zynq UltraScale+ MPSoC**（ZU3EG 属于此族）即可完成教程，精简后还需留出 110 GB 空闲，实际压缩包载荷约 23 GB；
-![AMD 官网 2024.1 安装包下载页面](assets/1/install-steps/device勾选.png)
+![器件族勾选：只保留 Zynq UltraScale+ MPSoC](assets/1/install-steps/device勾选.png)
 安装路径 `/home/<your-username>/tools/Xilinx`，最终磁盘占用可以查看 `Final Disk Usage`, 应该只有 50 多 GB；
-![AMD 官网 2024.1 安装包下载页面](assets/1/install-steps/选择安装路径.png)
+![安装路径填写与 Final Disk Usage 磁盘占用确认](assets/1/install-steps/选择安装路径.png)
 **step4.** 接下来就是等待和休息了，时间取决于你的校园网质量；另外不要长时间离开，安装过程可能需要你参与授权一些
 
 **许可证落地**：当前教程安装为免费版，下完即可用。实验室如果有 Enterprise license，询问你的 Mentor 获取使用方法。
