@@ -322,7 +322,7 @@ docker build \
 ```
 
 遇到因国内网络拉取失败的报错，先在 Docker 配置一份代理脚本，详情见：
-[dockerproxy 国内镜像站解决方案](https://dockerproxy.net/docs)
+[dockerproxy 国内镜像站解决方案](https://dockerproxy.net/docs)；
 [Docker 官方手册](https://docker.it-docs.cn/manuals/engine_daemon_proxy)
 
 但是对于解决了 Github 或是 Gmail 邮箱账号注册的读者，想必我不用说也有更好的解决方案
@@ -576,7 +576,7 @@ sed -i \
 构建，改完重跑 make 重编 dtb/image.ub，只需把新的 `image.ub` 拷到 TF 卡 FAT 分区
 覆盖，无需整卡重刷。
 
-## 13. 参考文献与致谢
+## 11. 参考文献与致谢
 
 **参考文献**：
 
