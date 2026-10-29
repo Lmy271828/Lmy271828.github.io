@@ -1,0 +1,1795 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="FPGA / PYNQ / 机器视觉 学习笔记与实验记录">
+      
+      
+      
+        <link rel="canonical" href="https://lmy271828.github.io/fz3b/01-build-image/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../02-flash-and-boot/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>移植篇(一) 从头编译 PYNQ v3.1.2 镜像 - Lmy271828</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#windows-11-pynq-v312-docker" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Lmy271828" class="md-header__button md-logo" aria-label="Lmy271828" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lmy271828
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              移植篇(一) 从头编译 PYNQ v3.1.2 镜像
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lmy271828/Lmy271828.github.io" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Lmy271828" class="md-nav__button md-logo" aria-label="Lmy271828" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lmy271828
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lmy271828/Lmy271828.github.io" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PYNQnoob
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PYNQnoob
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    系列总览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移植篇(一) 从头编译 PYNQ v3.1.2 镜像
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移植篇(一) 从头编译 PYNQ v3.1.2 镜像
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. 写在前面
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-wsl2-ubuntu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 安装 WSL2 Ubuntu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-docker-desktop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.安装 Docker Desktop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-amd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.注册 AMD 账号
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.注册 AMD 账号">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 下载管制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 换浏览器+无痕模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 使用学校邮箱注册账号
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 注意网络环境
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-installer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Installer 还是完整安装包？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-vivado-vitis-20241linux-wsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 安装 Vivado + Vitis 2024.1（Linux 版，进 WSL2）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-petalinux-20241-wsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 安装 PetaLinux 2024.1（进 WSL2）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-pynq-fz3b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 准备 PYNQ 源码、预编译组件与 FZ3B 板卡文件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 准备 PYNQ 源码、预编译组件与 FZ3B 板卡文件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-wsl-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 解决 WSL 下通过 ssh 克隆仓库的问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-pynq-v312" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 克隆 PYNQ v3.1.2 源码并编译
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sdhci1-bootargs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 修改设备树：sdhci1 修复与 bootargs 指向
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 构建 Docker 镜像并启动编译
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 产物验证与下一步
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 产物验证与下一步">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-windows-icsinternet-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Windows 侧开启 ICS（Internet 连接共享）给板卡发 IP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 验证之后
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 验证之后">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-wsl2-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 清理和压缩 WSL2 和 Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 踩坑实录（现象 → 根因 → 最小修复）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. 踩坑实录（现象 → 根因 → 最小修复）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1web-installer-500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 1：Web Installer 认证报 500
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2petalinux-binsh-is-not-bash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 2：PetaLinux 安装警告 /bin/sh is not bash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3wsl2-bitbake-perl-native" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 3：WSL2 时钟回拨 → bitbake 编译 perl-native 失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-embeddedsw-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 4：构建树克隆 embeddedsw 被拒——两级 git 环境
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5qemu-docker-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 5：QEMU 源码包被墙，docker build 失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-bl31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 6：串口只见三行 BL31，其他全静默
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-root-panicroot-emmc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 7：首启 root 挂载 panic——root= 指向了 eMMC
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 参考文献与致谢
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-flash-and-boot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移植篇(二) 刷写镜像与首次点亮
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. 写在前面
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-wsl2-ubuntu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 安装 WSL2 Ubuntu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-docker-desktop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.安装 Docker Desktop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-amd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.注册 AMD 账号
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.注册 AMD 账号">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 下载管制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 换浏览器+无痕模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 使用学校邮箱注册账号
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 注意网络环境
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-installer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Installer 还是完整安装包？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-vivado-vitis-20241linux-wsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 安装 Vivado + Vitis 2024.1（Linux 版，进 WSL2）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-petalinux-20241-wsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 安装 PetaLinux 2024.1（进 WSL2）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-pynq-fz3b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 准备 PYNQ 源码、预编译组件与 FZ3B 板卡文件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 准备 PYNQ 源码、预编译组件与 FZ3B 板卡文件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-wsl-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 解决 WSL 下通过 ssh 克隆仓库的问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-pynq-v312" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 克隆 PYNQ v3.1.2 源码并编译
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sdhci1-bootargs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 修改设备树：sdhci1 修复与 bootargs 指向
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 构建 Docker 镜像并启动编译
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 产物验证与下一步
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 产物验证与下一步">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-windows-icsinternet-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Windows 侧开启 ICS（Internet 连接共享）给板卡发 IP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 验证之后
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 验证之后">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-wsl2-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 清理和压缩 WSL2 和 Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 踩坑实录（现象 → 根因 → 最小修复）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. 踩坑实录（现象 → 根因 → 最小修复）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1web-installer-500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 1：Web Installer 认证报 500
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2petalinux-binsh-is-not-bash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 2：PetaLinux 安装警告 /bin/sh is not bash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3wsl2-bitbake-perl-native" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 3：WSL2 时钟回拨 → bitbake 编译 perl-native 失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-embeddedsw-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 4：构建树克隆 embeddedsw 被拒——两级 git 环境
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5qemu-docker-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 5：QEMU 源码包被墙，docker build 失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-bl31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 6：串口只见三行 BL31，其他全静默
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-root-panicroot-emmc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坑 7：首启 root 挂载 panic——root= 指向了 eMMC
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 参考文献与致谢
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="windows-11-pynq-v312-docker">移植篇(一)：Windows 11 从头编译 PYNQ v3.1.2 镜像（Docker 方案）<a class="headerlink" href="#windows-11-pynq-v312-docker" title="Permanent link">&para;</a></h1>
+<h2 id="0">0. 写在前面<a class="headerlink" href="#0" title="Permanent link">&para;</a></h2>
+<p><strong>读者画像</strong>：这是一篇写给像我一样的在校本科生和实验室萌新的"从头编译 PYNQ v3.1.2 镜像"的教程。由于从Windows宿主机上的环境配置开始讲起，所以会略显絮叨，有经验的读者仅作参考。
+本教程适合初次接触 Xilinx Zynq FPGA 板卡，无任何硬件开发与调试经验的在校学生（因为后续一些问题的解决方案需要依托学校和实验室的资源），你需要的基础只有：</p>
+<ul>
+<li>会使用 powershell 等命令行工具</li>
+<li>能使用简单的 git 命令，有一个自己的 GitHub 账号</li>
+<li>有磁盘管理意识</li>
+<li>有查阅英文文档和通过询问AI处理报错的耐心</li>
+</ul>
+<p><strong>开始之前</strong>：你需要一块百度 FZ3B 开发板(FZ3A也可，两者的芯片均为ACU3EG，最大不同仅在于板载内存，见 <a href="https://ai.baidu.com/ai-doc/HWCE/Qkda68drw#edgeboard_fz3ab%E8%AE%A1%E7%AE%97%E5%8D%A1">EdgeBoard FZ3A/B 计算卡官方文档</a>)，由于百度官方生态(EdgeBoard SDK)已停滞多年，硬件为 2019 年产品，社区通过 PYNQ 移植让它以通用开发板的身份继续发挥作用。目前已无法从百度或ALINX官网找到销售渠道，想新购的读者可以去二手市场寻找库存(价格应为千元以内，远低于 ALINX ACU3EG 板卡)。</p>
+<p><strong>参考资料</strong>：<a href="https://zhutmost.com/post/pynq-compile-2">zhutmost 博客</a>; <a href="https://github.com/zhutmost/edgeboard">zhutmost github仓库</a>; <a href="https://github.com/Xilinx/PYNQ">Xilinx PYNQ github仓库</a>; <a href="https://pynq.readthedocs.io/en/v3.1/">PYNQ 文档</a></p>
+<p><strong>编译环境一览表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>版本</th>
+<th>安装位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WSL2</td>
+<td>Ubuntu 24.04, 可用新版</td>
+<td>初始位置为C盘，后续可迁移</td>
+</tr>
+<tr>
+<td>PYNQ 源码</td>
+<td><strong>v3.1.2</strong>（tag）</td>
+<td>WSL2 ext4</td>
+</tr>
+<tr>
+<td>Vivado + Vitis</td>
+<td><strong>2024.1，Linux 版</strong></td>
+<td>WSL2 ext4</td>
+</tr>
+<tr>
+<td>PetaLinux</td>
+<td><strong>2024.1</strong></td>
+<td>WSL2 ext4</td>
+</tr>
+<tr>
+<td>编译容器</td>
+<td>ubuntu:22.04（v3.1.2 官方 Dockerfile 锁定）</td>
+<td>通过 docker 拉取和构建</td>
+</tr>
+<tr>
+<td>镜像内系统</td>
+<td>Ubuntu 22.04（jammy，<code>UBUNTU_RELEASE</code> 指定）</td>
+<td>编译产物</td>
+</tr>
+<tr>
+<td>Docker</td>
+<td>Docker Desktop</td>
+<td>Windows D盘，需要先安装 WSL2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>总成本</strong>：一块 FZ3B 板卡；一张 16GB(至少，因为镜像大小就有约 10 GB) 的 TF 卡及读卡器；一条网线；D 盘空闲 ≥ 250GB（保守估计）；编译 1~2 小时 + 大量排坑时间，建议留出两个下午。</p>
+<p><strong>预编译镜像</strong>：如果你只想直接使用镜像、跳过编译，可以拿我按本篇流程编译好的成品：<a href="https://pan.quark.cn/s/09422e4a256f?pwd=nKYR">夸克网盘链接</a>（提取码 <code>nKYR</code>），文件名 <code>edgeboard-fz3b-3.1.2.img</code>，约 9 GB，版本与本篇产物完全一致（PYNQ v3.1.2 / PetaLinux 2024.1，已含 §6.3 的设备树修复），下载后直接跳转<strong>移植篇(二)</strong>刷写点亮。</p>
+<h2 id="1-wsl2-ubuntu">1. 安装 WSL2 Ubuntu<a class="headerlink" href="#1-wsl2-ubuntu" title="Permanent link">&para;</a></h2>
+<p><strong>step1</strong>：在 PowerShell（管理员）中执行（推荐安装到D盘）：</p>
+<div class="highlight"><pre><span></span><code><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span>
+</code></pre></div>
+<p>或安装指定版本：</p>
+<div class="highlight"><pre><span></span><code><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span> <span class="n">-d</span> <span class="n">Ubuntu</span><span class="p">-</span><span class="n">24</span><span class="p">.</span><span class="n">04</span>
+</code></pre></div>
+<p>指定安装路径到D盘：</p>
+<div class="highlight"><pre><span></span><code><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span> <span class="n">-d</span> <span class="n">Ubuntu</span><span class="p">-</span><span class="n">24</span><span class="p">.</span><span class="n">04</span> <span class="p">-</span><span class="n">-location</span> <span class="n">D</span><span class="p">:\</span><span class="n">WSL2</span><span class="p">\</span><span class="n">Ubuntu</span><span class="p">-</span><span class="n">24</span><span class="p">.</span><span class="n">04</span> 
+</code></pre></div>
+<p>重启后进入 Ubuntu 首次初始化：新建用户名和密码，这个密码只用于提供 <code>sudo</code> 权限</p>
+<p>详情见：<a href="https://learn.microsoft.com/zh-cn/windows/wsl/setup/environment">MicroSoft 官方教程：设置 WSL 开发环境</a>;
+<a href="https://blog.csdn.net/weixin_50563385/article/details/159085131">社区教程1</a></p>
+<h2 id="2-docker-desktop">2.安装 Docker Desktop<a class="headerlink" href="#2-docker-desktop" title="Permanent link">&para;</a></h2>
+<p>详情见：<a href="https://docs.docker.com/desktop/setup/install/windows-install/">Install Docker Desktop on Windows</a>;
+<a href="https://www.cnblogs.com/zhenghang4121/p/22439436">社区教程1</a></p>
+<p>并将Docker设为 WSL 可用：
+<a href="https://docs.docker.com/desktop/features/wsl/">Docker 官方 WSL 教程</a></p>
+<h2 id="3-amd">3.注册 AMD 账号<a class="headerlink" href="#3-amd" title="Permanent link">&para;</a></h2>
+<p>到 <a href="https://www.amd.com/zh-cn/registration/create-account.html">AMD 官网开发者入口</a>注册账号。注册过程有以下几点需要注意(<a href="https://ask.csdn.net/questions/9752917">参考资料</a>)：</p>
+<h3 id="31">3.1 下载管制<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>AMD 的开发工具受美国出口管制（EAR）约束，被列入实体清单的高校学生请勿使用学校邮箱，个人邮箱推荐 <code>@gmail</code>，<code>@163</code> 不一定可以</p>
+<ul>
+<li><strong>注意</strong>：本教程不提供任何绕过管制的手段，但你或许可以寻找你的实验室Mentor寻求帮助。许多高校 FPGA 实验室提供 Vivado + Vitis 的安装包，配合学校已有的 license 可以离线安装</li>
+</ul>
+<h3 id="32">3.2 换浏览器+无痕模式<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>AMD 注册页对国产浏览器（360/QQ 浏览器的兼容模式）和带插件的浏览器经常报错——用 Edge</p>
+<h3 id="33">3.3 使用学校邮箱注册账号<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>对于未被管制的高校学生，推荐使用 <code>.edu.cn</code> 学校邮箱注册，因为 QQ/163 等免费邮箱有时被 AMD 风控拦截。我使用个人 <code>@163</code> 邮箱被直接拦截，换我的学校邮箱 <code>@mail.scut.edu.cn</code> 提交表单失败，后续申诉一次成功了。</p>
+<p><strong>若提交表单失败</strong>：发邮件申诉，主送 <code>account.help@amd.com</code>，抄送 <code>websupport@xilinx.com</code>（AMD 官方社区对账号注册/验证类问题指定的联系方式），附件带上<strong>学生证照片</strong>。邮件模板如下：<img alt="我实测成功的格式" src="../assets/1/install-steps/%E7%94%B3%E8%AF%89%E9%82%AE%E4%BB%B6.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">主题：Export Compliance Verification Failed - Manual Review Request - Academic Use</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Dear AMD/Xilinx Support Team,</span>
+
+<span class="l l-Scalar l-Scalar-Plain">My AMD account (email</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;注册邮箱&gt;) has repeatedly failed export compliance</span>
+<span class="l l-Scalar l-Scalar-Plain">verification despite submitting accurate information via the online review</span>
+<span class="l l-Scalar l-Scalar-Plain">form multiple times.</span>
+
+<span class="nt">Account Details</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Full Name</span><span class="p">:</span><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">&lt;姓名拼音，与账号注册信息一致&gt;</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Affiliation</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">Graduate Student, &lt;学校英文名&gt;</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Purpose</span><span class="p">:</span><span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">Academic research on FPGA-based &lt;研究内容&gt; using</span>
+<span class="w">                </span><span class="l l-Scalar l-Scalar-Plain">Zynq UltraScale+ MPSoC</span>
+
+<span class="nt">Request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Please manually review and reset my account compliance status.</span>
+<span class="l l-Scalar l-Scalar-Plain">I have attached my student ID card for verification.</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Thank you for your assistance.</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Best regards,</span>
+<span class="l l-Scalar l-Scalar-Plain">&lt;姓名拼音&gt;</span>
+</code></pre></div>
+<p>同类问题参考：<a href="https://adaptivesupport.amd.com/s/article/34573">官方账号创建指引（Article 34573）</a>、<a href="https://adaptivesupport.amd.com/s/article/44043">出口合规验证说明（Article 44043）</a>、<a href="https://blog.csdn.net/weixin_59962778/article/details/128019483">CSDN 实测——合规性不通过导致无法下载的处理过程</a>。</p>
+<h3 id="34">3.4 注意网络环境<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<p>如果挂着代理/VPN，先关掉再试（代理 IP 段常被注册系统拒绝） </p>
+<p>进入<a href="https://www.amd.com/zh-cn/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-1.html">vivado 2024.1 下载页面</a>后，若校园网稳定，推荐 Web Installer，Linux 版</p>
+<p><img alt="AMD 官网 2024.1 下载页面：选 Web Installer，Linux 版" src="../assets/1/install-steps/%E5%AE%98%E7%BD%91%E5%AE%89%E8%A3%85%E5%8C%85.png" /></p>
+<h3 id="web-installer">Web Installer 还是完整安装包？<a class="headerlink" href="#web-installer" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>形态</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Installer（200多 MB）</td>
+<td>运行时在线拉组件安装</td>
+<td>安装时长网络依赖大</td>
+</tr>
+<tr>
+<td>完整统一安装包（tar，一百多 GB）</td>
+<td>一次下完，断点可控</td>
+<td>单文件巨大，需额外空间解压</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-vivado-vitis-20241linux-wsl2">4. 安装 Vivado + Vitis 2024.1（Linux 版，进 WSL2）<a class="headerlink" href="#4-vivado-vitis-20241linux-wsl2" title="Permanent link">&para;</a></h2>
+<p><strong>下载</strong>：AMD 官网 → Unified Installer，选 <strong>Linux 版</strong>（<code>.bin</code> 或完整 tar 包），
+文件名形如 <code>FPGAs_AdaptiveSoCs_Unified_SDI_2024.1_*.bin</code>。下载到 Windows 后，从 WSL2 内拷进 ext4：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>~/downloads<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>/mnt/c/Users/&lt;your-username&gt;/Downloads/FPGAs_AdaptiveSoCs_Unified_2024.1_0522_2023_Lin64.bin<span class="w"> </span>~/downloads/
+<span class="c1"># 记得将 c/Users/&lt;your-username&gt;/Downloads 替换成本机 Edge 默认下载地址，之后遇到浏览器下载的文件也是如此</span>
+</code></pre></div>
+<p><strong>安装</strong>：</p>
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>~/downloads/FPGAs_AdaptiveSoCs_Unified_2024.1_0522_2023_Lin64.bin
+~/downloads/FPGAs_AdaptiveSoCs_Unified_2024.1_0522_2023_Lin64.bin<span class="w">                 </span><span class="c1"># 自动启动 WSLg 图形安装向导</span>
+</code></pre></div>
+<p>图形向导关键步骤：</p>
+<p><strong>step1.</strong> 弹出 <code>A Newer Verion Is Available</code> 框时，选 <code>Continue</code>；
+<img alt="安装向导弹出 A Newer Version Is Available，选 Continue" src="../assets/1/install-steps/%E4%B8%8D%E8%A6%81%E6%96%B0%E7%89%88.png" />
+<strong>step2.</strong> 选 Download and Install Now，账号和密码填你表单上上交的那个；
+<img alt="安装向导：选 Download and Install Now，填写 AMD 账号密码" src="../assets/1/install-steps/%E9%80%89%E6%8C%89%E9%9C%80%E5%AE%89%E8%A3%85.png" />
+<strong>step3.</strong> Install Type：<strong>Vitis</strong>（统一安装器，Vivado 会一并装入）；
+勾选器件族时<strong>只留 Zynq UltraScale+ MPSoC</strong>（ZU3EG 属于此族）即可完成教程，精简后还需留出 110 GB 空闲，实际压缩包载荷约 23 GB；
+<img alt="器件族勾选：只保留 Zynq UltraScale+ MPSoC" src="../assets/1/install-steps/device%E5%8B%BE%E9%80%89.png" />
+安装路径 <code>/home/&lt;your-username&gt;/tools/Xilinx</code>，最终磁盘占用可以查看 <code>Final Disk Usage</code>, 应该只有 50 多 GB；
+<img alt="安装路径填写与 Final Disk Usage 磁盘占用确认" src="../assets/1/install-steps/%E9%80%89%E6%8B%A9%E5%AE%89%E8%A3%85%E8%B7%AF%E5%BE%84.png" />
+<strong>step4.</strong> 接下来就是等待和休息了，时间取决于你的校园网质量；另外不要长时间离开，安装过程可能需要你参与授权一些</p>
+<p><strong>许可证落地</strong>：当前教程安装为免费版，下完即可用。实验室如果有 Enterprise license，询问你的 Mentor 获取使用方法。</p>
+<p><strong>验证</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>~/tools/Xilinx/Vivado/2024.1/settings64.sh
+vivado<span class="w"> </span>-version<span class="w">                                         </span><span class="c1"># 注意 vivado 的版本验证为单横杠</span>
+<span class="nb">source</span><span class="w"> </span>~/tools/Xilinx/Vitis/2024.1/settings64.sh
+vitis<span class="w"> </span>--version<span class="w">                                     </span>
+</code></pre></div>
+<p><img alt="bash 验证" src="../assets/1/install-steps/%E6%88%90%E5%8A%9F.png" /></p>
+<h2 id="5-petalinux-20241-wsl2">5. 安装 PetaLinux 2024.1（进 WSL2）<a class="headerlink" href="#5-petalinux-20241-wsl2" title="Permanent link">&para;</a></h2>
+<p><strong>OS 支持口径</strong>：PetaLinux 2024.1 官方宿主列表是 Ubuntu
+20.04.4/22.04<a href="https://docs.amd.com/r/2024.1-English/ug973-vivado-release-notes-install-license/Supported-Operating-Systems">UG973</a>，没有 24.04——但这个约束只作用于二进制
+运行时（在容器里），安装器在 WSL2 上只负责解包。作者 @zhutmost 在 Ubuntu 25.04 上安装
+成功<a href="https://zhutmost.com/post/pynq-compile-2">参考资料</a>，佐证安装器不校验宿主版本，放心装。</p>
+<p><strong>安装</strong>：
+<img alt="进入 PetaLinux 2024.1 Installer 下载表单提交界面" src="https://account.amd.com/en/forms/downloads/xef.html?filename=petalinux-v2024.1-05202009-installer.run" /></p>
+<p><strong>先将 /bin/sh 指向 bash</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ln<span class="w"> </span>-sf<span class="w"> </span>bash<span class="w"> </span>/bin/sh
+ls<span class="w"> </span>-l<span class="w"> </span>/bin/sh
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/mnt/c/Users/&lt;your-username&gt;/Downloads/petalinux-v2024.1-05202009-installer.run<span class="w"> </span>~/downloads/
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/petalinux/2024.1
+chmod<span class="w"> </span>+x<span class="w"> </span>~/downloads/petalinux-v2024.1-05202009-installer.run
+~/downloads/petalinux-v2024.1-05202009-installer.run<span class="w"> </span>-d<span class="w"> </span>~/petalinux/2024.1
+</code></pre></div>
+<p>一般新装的 WSL Ubuntu 24.04 都会遇到的问题，详情见<a href="https://developer.aliyun.com/article/1592251">PetaLinux 2024.1安装笔记</a>：</p>
+<p><img alt="缺库" src="../assets/1/install-steps/%E7%BC%BA%E5%BA%93.png" /></p>
+<p>补装</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gcc<span class="w"> </span>xterm<span class="w"> </span>autoconf<span class="w"> </span>libtool<span class="w"> </span>texinfo<span class="w"> </span>zlib1g-dev<span class="w"> </span>gcc-multilib<span class="w"> </span>build-essential<span class="w"> </span>zlib1g<span class="w"> </span>libncurses5-dev
+</code></pre></div>
+<p>重新执行</p>
+<div class="highlight"><pre><span></span><code>~/downloads/petalinux-v2024.1-05202009-installer.run<span class="w"> </span>-d<span class="w"> </span>~/petalinux/2024.1
+</code></pre></div>
+<p>报 [WARNING] No tftp server found 不用管，看完条款按 <code>q</code> 退出，按 <code>y</code> 同意</p>
+<p><strong>验证</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>~/petalinux/2024.1/settings.sh
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$PETALINUX_VER</span><span class="w">    </span><span class="c1"># 输出版本 2024.1</span>
+</code></pre></div>
+<h2 id="6-pynq-fz3b">6. 准备 PYNQ 源码、预编译组件与 FZ3B 板卡文件<a class="headerlink" href="#6-pynq-fz3b" title="Permanent link">&para;</a></h2>
+<h3 id="61-wsl-ssh">6.1 解决 WSL 下通过 ssh 克隆仓库的问题<a class="headerlink" href="#61-wsl-ssh" title="Permanent link">&para;</a></h3>
+<p><strong>step1</strong>：首先你需要将 Windows 上的网络接口“镜像”到 Linux，详情参考：
+<a href="https://learn.microsoft.com/zh-cn/windows/wsl/networking#mirrored-mode-networking">MicroSoft 官方教程</a></p>
+<p><strong>step2</strong>：其次在 WSL 中生成 ssh key，详情见以下资料：
+<a href="https://juejin.cn/post/7656739222133850152">社区教程1</a>
+<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent">github 官方文档1</a>
+<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">github 官方文档2</a></p>
+<p><strong>排查文档</strong>：
+<a href="https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port">github 排查 ssh 故障</a></p>
+<h3 id="62-pynq-v312">6.2 克隆 PYNQ v3.1.2 源码并编译<a class="headerlink" href="#62-pynq-v312" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.autocrlf<span class="w"> </span><span class="nb">false</span><span class="w">   </span><span class="c1"># 保险：禁止行尾自动转换</span>
+git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>--branch<span class="w"> </span>v3.1.2<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/Xilinx/PYNQ.git<span class="w"> </span>~/pynq
+<span class="c1"># 与 prebuilt 制品（sdist 3.1.2）同版本的发布 tag，子模块需全量</span>
+<span class="nb">cd</span><span class="w"> </span>~/pynq<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD
+<span class="c1"># 应输出 3c77124d86bab65ac7bb6beb0aa66e13c83508f2</span>
+</code></pre></div>
+<p><strong>FZ3B 板卡文件接入</strong>（由 <a href="https://github.com/changhai0109">@changhai0109</a> 贡献，见第 13 节致谢）：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/zhutmost/edgeboard.git<span class="w"> </span>~/edgeboard
+</code></pre></div>
+<p>注意，这里直接沿用 </p>
+<p>看懂三件套（编译时才知道每步在干嘛）：</p>
+<ol>
+<li><code>edgeboard-fz3b.spec</code>（来源：zhutmost/edgeboard，MIT）：</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nv">ARCH_edgeboard-fz3b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>aarch64<span class="w">          </span><span class="c1"># ZU+ 是 64 位 ARM</span>
+<span class="nv">BSP_edgeboard-fz3b</span><span class="w"> </span><span class="o">:=</span><span class="w">                   </span><span class="c1"># 留空：由 base.xsa 自动生成 BSP</span>
+<span class="nv">BITSTREAM_edgeboard-fz3b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>base/base.bit<span class="w">   </span><span class="c1"># 开机加载的 overlay</span>
+<span class="nv">FPGA_MANAGER_edgeboard-fz3b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="m">1</span><span class="w">        </span><span class="c1"># PL 重配置由内核接管</span>
+<span class="nv">STAGE4_PACKAGES_edgeboard-fz3b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>xrt<span class="w"> </span>pynq<span class="w"> </span>boot_leds<span class="w"> </span>ethernet
+</code></pre></div>
+<ol>
+<li><code>petalinux_bsp/</code>：<code>hardware_project/base.xsa</code> 交给流程自动生成 BSP；
+   <code>meta-user/.../system-user.dtsi</code> 只做一件事——修 TF 卡控制器（<code>sdhci1</code>）的
+   频率与 1.8V 信号问题；</li>
+<li><code>packages/boot_leds/</code>：开机自动加载 base overlay 并闪灯的小包（<code>pre.sh</code> 把
+   <code>boot.py</code> 塞进镜像 <code>/boot/</code>）。
+<strong>预编译组件</strong>（sdbuild 从 v3.0 起要求预置，避免每次重建 Ubuntu rootfs）：从<a href="https://www.pynq.io/boards.html">PYNQ boards 页</a> 下载 3.1 线的两个板卡无关构件，实测页面上是 <a href="https://download.amd.com/opendownload/pynq/pynq-3.1.2.tar.gz">pynq-3.1.2.tar.gz</a>（PYNQ 包源码分发，与检出的源码同为 3.1.2 版本，全链一致）和 <a href="https://download.amd.com/opendownload/pynq/jammy.aarch64.3.1.0.tar.gz">jammy.aarch64.3.1.0.tar.gz</a>（Ubuntu 22.04 rootfs 底盘，标签 3.1.0 无碍，PYNQ 包版本由 sdist 决定）。下载时用原名，拷入 <code>prebuilt/</code> 时<strong>改成 sdbuild认的固定文件名</strong>：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/mnt/c/Users/&lt;your-username&gt;/Downloads/jammy.aarch64.3.1.0.tar.gz<span class="w"> </span>~/pynq/sdbuild/prebuilt/pynq_rootfs.aarch64.tar.gz
+cp<span class="w"> </span>/mnt/c/Users/&lt;your-username&gt;/Downloads/pynq-3.1.2.tar.gz<span class="w"> </span>~/pynq/sdbuild/prebuilt/pynq_sdist.tar.gz
+</code></pre></div>
+<h3 id="63-sdhci1-bootargs">6.3 修改设备树：sdhci1 修复与 bootargs 指向<a class="headerlink" href="#63-sdhci1-bootargs" title="Permanent link">&para;</a></h3>
+<p><strong>修改 bootargs 的真正入口 <code>pynq_bootargs.dtsi</code></strong>——它属于 PYNQ 自带的 meta-pynq 层，对 <code>chosen/bootargs</code> 的定义会覆盖板卡文件的 system-user.dtsi（实测：dtb 最终采用了它的 <code>root=/dev/mmcblk0p2</code>）：</p>
+<div class="highlight"><pre><span></span><code>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'s|root=/dev/mmcblk0p2|root=/dev/mmcblk1p2|'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>~/pynq/sdbuild/boot/meta-pynq/recipes-bsp/device-tree/files/pynq_bootargs.dtsi
+</code></pre></div>
+<p><strong>为什么要改</strong>：FZ3B 是 <strong>eMMC + TF 卡双存储</strong>板。启动日志的分区清单显示，设备枚举结果为 eMMC = <code>mmcblk0</code>（7.28GB，内含出厂分区）、TF 卡 = <code>mmcblk1</code>（8.88GB rootfs）。而 PetaLinux 模板生成的默认 bootargs 是 <code>root=/dev/mmcblk0p2</code>——指向的是 <strong>eMMC 里的出厂分区</strong>，它不是 PYNQ 的 ext4，首次启动必然：</p>
+<div class="highlight"><pre><span></span><code>Kernel<span class="w"> </span>panic<span class="w"> </span>-<span class="w"> </span>not<span class="w"> </span>syncing:<span class="w"> </span>VFS:<span class="w"> </span>Unable<span class="w"> </span>to<span class="w"> </span>mount<span class="w"> </span>root<span class="w"> </span>fs<span class="w"> </span>on<span class="w"> </span>unknown-block<span class="o">(</span><span class="m">179</span>,10<span class="o">)</span>
+No<span class="w"> </span>filesystem<span class="w"> </span>could<span class="w"> </span>mount<span class="w"> </span>root,<span class="w"> </span>tried:<span class="w"> </span>ext4
+</code></pre></div>
+<p>上面的覆盖把 root 显式指到 TF 卡的 rootfs 分区。控制台 <code>ttyPS0</code>（ff010000）就是
+USB-UART 接的那颗 UART——官方手册的 USB_UART 接口表（PS_UART1，MIO24/25）与之一致，
+构建完成后串口全程可见内核日志。跳过这一步的后果与补救见第 10 节坑 7。</p>
+<p>然后迁移 FZ3B 板卡文件：</p>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>-r<span class="w"> </span>~/edgeboard/pynq/edgeboard-fz3b<span class="w"> </span>~/pynq/boards/
+</code></pre></div>
+<h2 id="7-docker">7. 构建 Docker 镜像并启动编译<a class="headerlink" href="#7-docker" title="Permanent link">&para;</a></h2>
+<p>先在 Windows 双击运行 Docker Desktop，回到 <strong>WSL2 终端</strong> 运行：</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>version
+</code></pre></div>
+<p><img alt="确保看见 Client 和 Server 的完整信息" src="../assets/1/built-steps/docker.png" />
+挂载路径一律写 WSL2 内部路径，不要写 <code>\\wsl$</code> UNC。</p>
+<p><strong>构建容器镜像</strong>（三个 build-arg 让容器内产物归属你，避免 root 文件污染仓库）：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/pynq/sdbuild
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">USERNAME</span><span class="o">=</span><span class="k">$(</span>whoami<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">USER_UID</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">USER_GID</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>pynqdock:latest<span class="w"> </span>.
+</code></pre></div>
+<p>遇到因国内网络拉取失败的报错，先在 Docker 配置一份代理脚本，详情见：
+<a href="https://dockerproxy.net/docs">dockerproxy 国内镜像站解决方案</a>；
+<a href="https://docker.it-docs.cn/manuals/engine_daemon_proxy">Docker 官方手册</a></p>
+<p>但是对于解决了 Github 或是 Gmail 邮箱账号注册的读者，想必我不用说也有更好的解决方案</p>
+<p>若没有“更好的解决方案”，我通过实践发现：
+<strong>国内网络补丁：预下载 QEMU 源码</strong>（<code>download.qemu.org</code> 在国内常被掐断，首次
+<code>docker build</code> 会在第 5 步 wget 失败；思路是把"下载"换成"喂包"）：</p>
+<ol>
+<li>在 Windows 浏览器下载
+   <a href="https://download.qemu.org/qemu-5.2.0.tar.bz2"><code>https://download.qemu.org/qemu-5.2.0.tar.bz2</code></a>
+   （约 65MB，浏览器可断点续传；TUNA/USTC/NJU 均无 qemu 镜像，别绕路）；</li>
+<li>拷进 build context，并给 Dockerfile 打两行补丁（插入 COPY、删去 wget 行）：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/mnt/c/Users/&lt;your-username&gt;/Downloads/qemu-5.2.0.tar.bz2<span class="w"> </span>~/pynq/sdbuild/
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c"># Build and install QEMU</span>
+<span class="k">COPY</span><span class="w"> </span>qemu-5.2.0.tar.bz2<span class="w"> </span>/opt/qemu-src/
+<span class="k">RUN</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/opt/qemu-src<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">qemuver</span><span class="o">=</span><span class="m">5</span>.2.0<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>tar<span class="w"> </span>-xf<span class="w"> </span>qemu-<span class="nv">$qemuver</span>.tar.bz2<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>qemu-<span class="nv">$qemuver</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./configure<span class="w"> </span>--target-list<span class="o">=</span>arm-linux-user,aarch64-linux-user<span class="w"> </span>--prefix<span class="o">=</span>/opt/qemu<span class="w"> </span>--static<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/opt/qemu/bin<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>qemu-arm-static<span class="w"> </span>qemu-aarch64-static<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>qemu-arm<span class="w"> </span>qemu-arm-static<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>qemu-aarch64<span class="w"> </span>qemu-aarch64-static<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/opt/qemu-src
+</code></pre></div>
+<p>补丁会让 <code>~/pynq</code> 的 git 状态多一个改动和一个未跟踪文件，无害；想还原
+   <code>git checkout -- sdbuild/Dockerfile</code> 即可。前序 apt 层有 Docker 缓存，重跑
+   <code>docker build</code> 几秒就回到这一步。</p>
+<p><strong>启动编译容器</strong>（在仓库顶层目录；工具与 PetaLinux 以<strong>同路径</strong>只读挂入——
+settings 脚本里烧录着安装时的绝对路径，宿主与容器路径一致才能解析）：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/pynq
+docker<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--init<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="nv">$HOME</span>/tools/Xilinx:<span class="nv">$HOME</span>/tools/Xilinx:ro<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="nv">$HOME</span>/petalinux/2024.1:<span class="nv">$HOME</span>/petalinux/2024.1:ro<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>pynq-sdbuild-env<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--privileged<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pynqdock:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/bin/bash
+</code></pre></div>
+<p><strong>容器内</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/tools/Xilinx/Vivado/2024.1/settings64.sh
+<span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/petalinux/2024.1/settings.sh
+<span class="nb">cd</span><span class="w"> </span>/workspace/sdbuild
+
+<span class="c1"># 构建树（build/PYNQ）会尝试现场克隆 embeddedsw 子模块：容器内 GitHub 不可达，</span>
+<span class="c1"># 所以把 URL 重定向到宿主仓库已就位的本地子模块（file:// 离线克隆）</span>
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>protocol.file.allow<span class="w"> </span>always<span class="w">       </span><span class="c1"># 赋予 submodule 使用 file 协议权限，详情见 Git 2.38.1（CVE-2022-39253 修复）</span>
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>url.<span class="s2">"file:///workspace/.git/modules/pynq/lib/_pynq/embeddedsw"</span>.insteadOf<span class="w"> </span><span class="s2">"https://github.com/Xilinx/embeddedsw.git"</span>
+
+<span class="c1"># ports.ubuntu.com 国内时好时坏，换 TUNA 的 ubuntu-ports 源</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYNQ_UBUNTU_REPO</span><span class="o">=</span>https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/
+make<span class="w"> </span><span class="nv">BOARDS</span><span class="o">=</span>edgeboard-fz3b<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>~/make-<span class="k">$(</span>date<span class="w"> </span>+%m%d-%H%M<span class="k">)</span>.log
+</code></pre></div>
+<p>之后是 1~2 小时的自动流水线：multistrap 拉 Ubuntu rootfs → QEMU chroot 装包 →XSA 生成 BSP（PetaLinux）→ 产 boot 文件 → 合成最终镜像。
+编译过程中可能会遇到跨平台开发常见的依赖文件的时间戳超前问题，社区解决方案和参考资料如下：
+<a href="https://blog.csdn.net/qq_45779334/article/details/121991176">make[2]: warning:  Clock skew detected.  Your build may be incomplete.</a>
+<a href="https://www.gnu.org/software/make/manual/make.html">GNU make 手册</a>
+根据 make 手册 <a href="https://www.gnu.org/software/make/manual/html_node/Recursion.html">5.7 Recursive Use of make</a> 章节，编号越大就是越深的子 make，因为失败是从深到浅递归传播，所以排障永远从编号 <code>N</code> 最大的第一处 make [N] 入手，浅层的 Error 一般都是根因诱发。</p>
+<p>需要注意的是，容器编译方案虽然能避免因依赖不匹配发生的错误，但编译过程中仍然会遇到各种各样的报错，需要良好的日志管理习惯和查阅文档、询问AI的耐心。对于本篇实测未覆盖的部分，排查思路（日志记录、噪声过滤、定位根因）比记住每个报错更重要。</p>
+<h2 id="8">8. 产物验证与下一步<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>看到</p>
+<div class="highlight"><pre><span></span><code>The<span class="w"> </span>new<span class="w"> </span>image<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>found<span class="w"> </span>here:...
+</code></pre></div>
+<p>意味着镜像构建完成，恭喜！！！</p>
+<p><img alt="构建完成的 img 产物" src="../assets/1/built-steps/%E4%BA%A7%E7%94%9Fimg.png" /></p>
+<p>接下来验证产物，新开一个 WSL 终端：</p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-lh<span class="w"> </span>~/pynq/sdbuild/output/
+<span class="c1"># 输出belike:</span>
+total<span class="w"> </span><span class="m">6</span>.4G
+drwxr-xr-x<span class="w"> </span><span class="m">3</span><span class="w"> </span>lenovo<span class="w"> </span>lenovo<span class="w"> </span><span class="m">4</span>.0K<span class="w"> </span>Oct<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">22</span>:01<span class="w"> </span>boot
+drwxr-xr-x<span class="w"> </span><span class="m">3</span><span class="w"> </span>lenovo<span class="w"> </span>lenovo<span class="w"> </span><span class="m">4</span>.0K<span class="w"> </span>Oct<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">22</span>:46<span class="w"> </span>dist
+-rw-r--r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>lenovo<span class="w"> </span>lenovo<span class="w"> </span><span class="m">9</span>.1G<span class="w"> </span>Oct<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">22</span>:46<span class="w"> </span>edgeboard-fz3b-3.1.2.img
+
+file<span class="w">  </span>~/pynq/sdbuild/output/edgeboard-fz3b-*.img
+</code></pre></div>
+<p>将产物拷回 Windows，</p>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>~/pynq/sdbuild/output/edgeboard-fz3b-3.1.2.img<span class="w"> </span>/mnt/d/
+</code></pre></div>
+<p>Windows 下下载镜像烧录工具 <a href="https://www.etcher.com.cn/download.html">balenaEtcher</a>。注意，windows 下烧录时，不要理会其关于 “格式化”或“无法访问”之类的弹窗，一律叉掉即可。一定要等烧写和验证进度条走完后，再弹出，最后拔出读卡器。</p>
+<p>TF卡插入板卡槽，上电，连网线</p>
+<h3 id="81-windows-icsinternet-ip">8.1 Windows 侧开启 ICS（Internet 连接共享）给板卡发 IP<a class="headerlink" href="#81-windows-icsinternet-ip" title="Permanent link">&para;</a></h3>
+<p>按快捷键 <code>Win+R</code> 输入 <code>ncpa.cpl</code>，进入网络连接界面，其中 WLAN 侧时共享的提供方，右键 WLAN <code>属性</code>，进入 <code>共享</code>，<code>家庭网络连接</code> 选板卡连的那块以太网。</p>
+<p><img alt="如图所示" src="../assets/1/built-steps/%E7%BD%91%E7%BB%9C%E5%85%B1%E4%BA%AB.png" /></p>
+<p>然后再powershell执行：</p>
+<div class="highlight"><pre><span></span><code><span class="n">arp</span> <span class="n">-a</span> <span class="p">|</span> <span class="n">findstr</span> <span class="n">192</span><span class="p">.</span><span class="n">168</span><span class="p">.</span><span class="n">137</span>
+</code></pre></div>
+<p>然后浏览器输入 192.168.137.x (除去 .1 和 .255 后剩下的那个)，密码为 <code>xilinx</code>
+<img alt="jupyter登录页" src="../assets/1/built-steps/jupyter.png" />
+刷写 <code>.img</code> 后，刷写与首次点亮见<strong>移植篇(二)</strong>。与原作者预编译镜像（PYNQ v3.0.1，PetaLinux 2022.1 时代）的差异：内核与工具链代差（2022.1 → 2024.1）、PYNQ Python API 层面保持兼容，后续教程两者通用。</p>
+<h2 id="9">9. 验证之后<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>在走完<strong>移植篇(二)</strong>后可以着手清理 WSL 宿主机中编译过程</p>
+<h3 id="91-wsl2-docker">9.1 清理和压缩 WSL2 和 Docker<a class="headerlink" href="#91-wsl2-docker" title="Permanent link">&para;</a></h3>
+<p><a href="https://zhuanlan.zhihu.com/p/2001292650641367095">社区资料1</a></p>
+<p>如何查看本机 .vhdx 虚拟硬盘所在？</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-ChildItem</span> <span class="n">HKCU</span><span class="p">:\</span><span class="n">Software</span><span class="p">\</span><span class="n">Microsoft</span><span class="p">\</span><span class="n">Windows</span><span class="p">\</span><span class="n">CurrentVersion</span><span class="p">\</span><span class="n">Lxss</span> <span class="p">|</span>
+  <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nb">Get-ItemProperty</span> <span class="nv">$_</span><span class="p">.</span><span class="n">PSPath</span> <span class="p">}</span> <span class="p">|</span>
+  <span class="nb">Select-Object</span> <span class="n">DistributionName</span><span class="p">,</span> <span class="n">BasePath</span>
+</code></pre></div>
+<p>结果be like，vhdx 就在 BasePath\ext4.vhdx:
+<img alt="我本机的运行结果" src="../assets/1/disk-steps/%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E4%BD%8D%E7%BD%AE.png" /></p>
+<h2 id="10">10. 踩坑实录（现象 → 根因 → 最小修复）<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<p>以下坑位全部来自本篇实测。通用姿势：构建命令一律加 <code>2&gt;&amp;1 | tee xxx.log</code> 落盘，检索用
+<code>grep -nE "ERROR:|Error [0-9]|WARNING|skew|in the future" xxx.log</code>，从<strong>第一个</strong> Error 往前找根因——后面的多为连锁反应。Yocto 任务的全量日志在文件系统里：
+<code>build/edgeboard-fz3b/petalinux_project/build/tmp/work/&lt;架构&gt;/&lt;包名&gt;/temp/log.do_&lt;任务&gt;</code>。</p>
+<h3 id="1web-installer-500">坑 1：Web Installer 认证报 500<a class="headerlink" href="#1web-installer-500" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：<code>~/.Xilinx/xinstall/*.log</code> 中 <code>rspStatusCode: 500 Internal Server Error</code> +
+<code>Authentication error: An unknown exception occurred</code>，提示核对邮箱密码——与密码无关，是 AMD 认证服务端异常。
+<strong>出处</strong>：AMD 认证服务端（在线环节，不涉及本地任何文件）。
+<strong>修复</strong>：过会再重启安装进程，或者换 SFD 完整安装包。</p>
+<h3 id="2petalinux-binsh-is-not-bash">坑 2：PetaLinux 安装警告 /bin/sh is not bash<a class="headerlink" href="#2petalinux-binsh-is-not-bash" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：<code>[WARNING] No tftp server found</code> 可忽略（<code>tftpd</code> 包在 24.04 已不存在）；
+真正的动作项是 <code>[WARNING] /bin/sh is not bash!</code>——24.04 上 <code>dpkg-reconfigure dash</code>
+已失效（Noble 移除了该询问），不会弹窗。
+<strong>出处</strong>：PetaLinux 2024.1 安装器的宿主环境自检（AMD 官方安装器要求 /bin/sh 为 bash）。
+<strong>修复</strong>：<code>sudo ln -sf bash /bin/sh</code>，<code>ls -l /bin/sh</code> 确认 <code>sh -&gt; bash</code> 后重跑安装器。</p>
+<h3 id="3wsl2-bitbake-perl-native">坑 3：WSL2 时钟回拨 → bitbake 编译 perl-native 失败<a class="headerlink" href="#3wsl2-bitbake-perl-native" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：bitbake 阶段大量
+<code>Warning: File 'Makefile' has modification time 0.68 s in the future</code> + <code>Clock skew detected</code>，Makefile 重建循环无法收敛，perl-native do_compile 失败。
+<strong>根因</strong>：构建中途 WSL2 内核时钟被回拨约 0.7 秒（Windows 时钟被 NTP 校正，hv_utils
+瞬时传导给 WSL 内核），新写文件的时间戳全部"来自未来"。偏移量随并行任务次序每 0.01s
+递增（0.66→0.70）是"回拨+并行写入"的指纹。
+<strong>出处</strong>：失败载体是 PetaLinux 2024.1 的 poky 层 <code>meta/recipes-devtools/perl/perl_5.36.0.bb</code>
+（perl-native do_compile）；触发源与三方板卡文件无关，是 WSL2/Windows 的时钟机制。
+<strong>修复</strong>：WSL 里 <code>sudo apt install util-linux-extra &amp;&amp; sudo hwclock -s</code>（24.04 的
+hwclock 在 extra 包里），重进容器 <code>make</code> 续跑——bitbake 幂等，已完成任务走缓存。
+<strong>预防</strong>：构建前三连（管理员 PowerShell）：<code>w32tm /resync /force</code>；<code>net stop w32time</code>；
+<code>powercfg /change standby-timeout-ac 0</code>。构建后恢复：<code>net start w32time</code>；
+<code>powercfg /change standby-timeout-ac 60</code>。</p>
+<h3 id="4-embeddedsw-git">坑 4：构建树克隆 embeddedsw 被拒——两级 git 环境<a class="headerlink" href="#4-embeddedsw-git" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：make 在 <code>build/jammy.edgeboard-fz3b/home/xilinx/pynq_git/</code> 克隆子模块时
+<code>Failed to connect to github.com port 443</code>。你在容器 <code>~/.gitconfig</code> 里配的镜像
+insteadOf 对它无效。
+<strong>根因</strong>：克隆发生在 <strong>chroot（目标 rootfs）内部</strong>，git 读的是 rootfs 自己的
+<code>/etc/gitconfig</code>——容器用户的配置对它不可见。
+<strong>出处</strong>：PYNQ 官方 <code>sdbuild/Makefile</code> 的克隆规则（<code>git clone ../ $@ &amp;&amp; git submodule
+init &amp;&amp; git submodule update</code>）——AMD 官方设计假设构建环境可达 GitHub，与三方板卡
+文件无关。
+<strong>修复</strong>：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--file<span class="w"> </span>~/pynq/sdbuild/build/jammy.edgeboard-fz3b/etc/gitconfig<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>url.<span class="s2">"https://ghfast.top/https://github.com/"</span>.insteadOf<span class="w"> </span><span class="s2">"https://github.com/"</span>
+</code></pre></div>
+<p>重跑 <code>make</code>。注意 embeddedsw 全量克隆在 qemu 模拟的 chroot 里较慢（可能 20~60 分钟），
+<code>du -sh</code> 该目录判断是否在增长，别误判卡死。</p>
+<h3 id="5qemu-docker-build">坑 5：QEMU 源码包被墙，docker build 失败<a class="headerlink" href="#5qemu-docker-build" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：<code>wget http://download.qemu.org/qemu-5.2.0.tar.bz2</code> 转 HTTPS 后
+<code>No data received</code> / <code>OpenSSL: unexpected eof</code>。TUNA/USTC/NJU 均无 qemu 镜像。
+<strong>出处</strong>：PYNQ 官方 <code>sdbuild/Dockerfile</code>（wget 行硬编码 <code>download.qemu.org</code> 官方源）。
+<strong>修复</strong>：Windows 浏览器下载官方 tar 包（可断点续传），拷进 build context，Dockerfile
+把 wget 行换成 COPY（见 §7 的国内网络补丁）。</p>
+<h3 id="6-bl31">坑 6：串口只见三行 BL31，其他全静默<a class="headerlink" href="#6-bl31" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：若没有执行 6.2 的 <code>system-user.dtsi</code> 文件修复就先执行文件迁移命令，复位后串口只有 BL31 三行 NOTICE，看不到 FSBL 横幅、U-Boot 横幅和内核日志（串口调试工具为<a href="https://mobaxterm.mobatek.net/">MobaXterm</a>）：</p>
+<div class="highlight"><pre><span></span><code>NOTICE:<span class="w">  </span>BL31:<span class="w"> </span>Non<span class="w"> </span>secure<span class="w"> </span>code<span class="w"> </span>at<span class="w"> </span>0x8000000
+NOTICE:<span class="w">  </span>BL31:<span class="w"> </span>v2.10.0<span class="w">  </span><span class="o">(</span>release<span class="o">)</span>:v1.1-13187-g4f82b6134
+NOTICE:<span class="w">  </span>BL31:<span class="w"> </span>Built<span class="w"> </span>:<span class="w"> </span><span class="m">04</span>:45:53,<span class="w"> </span>Mar<span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="m">2024</span>
+</code></pre></div>
+<p>复位多次结果完全一致——确定性失败，非偶发。两个防跑偏提示：①三行 BL31 说明 FSBL/BL31 已经跑起来了、SD 启动模式也对——板子没砖；②PC 与板卡的链路灯是亮的（PHY 协商在硬件层完成），别被"网线是通的"带偏去查物理层。</p>
+<p><strong>根因</strong>：FZ3B 的调试串口接 <strong>PS_UART1</strong>（<a href="https://ai.baidu.com/ai-doc/HWCE/nkq9b5ncu#%E5%8D%81%E3%80%81usb_uart%E6%8E%A5%E5%8F%A3">官方手册 USB_UART 接口表</a>：MIO24/25），而 BSP 自动生成的串口配置为 FSBL/PMU/内核 = UART0、TF-A = UART1——只有 TF-A 的输出接对了线，U-Boot 与内核则在向未接线的 UART0 输出。
+<strong>出处</strong>：分裂配置在构建生成的 <code>petalinux_project/project-spec/configs/config</code>（TF-A=UART1，其余=UART0）——由 PetaLinux 2024.1 模板自动生成；changhai0109 分发的板卡文件不含该配置文件（仓库里只有 spec/XSA/BSP dtsi/boot_leds），故非其分发物之过，而是模板默认值与 FZ3B 接线的错位。
+<strong>修复</strong>：§6.2 的 <code>system-user.dtsi</code> 修改方案已把内核控制台锁定为 <code>console=ttyPS0</code>（接线正确的那颗）；FSBL/PMU 的输出可见性按需执行下面的串口三连 sed（只影响日志观感，不影响功能；该 sed 必须在首次 make 生成配置文件之后执行，改完重跑 make）：</p>
+<div class="highlight"><pre><span></span><code>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^# CONFIG_SUBSYSTEM_FSBL_SERIAL_PSU_UART_1_SELECT is not set|CONFIG_SUBSYSTEM_FSBL_SERIAL_PSU_UART_1_SELECT=y|'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^CONFIG_SUBSYSTEM_FSBL_SERIAL_PSU_UART_0_SELECT=y|# CONFIG_SUBSYSTEM_FSBL_SERIAL_PSU_UART_0_SELECT is not set|'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^# CONFIG_SUBSYSTEM_PMUFW_SERIAL_PSU_UART_1_SELECT is not set|CONFIG_SUBSYSTEM_PMUFW_SERIAL_PSU_UART_1_SELECT=y|'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^CONFIG_SUBSYSTEM_PMUFW_SERIAL_PSU_UART_0_SELECT=y|# CONFIG_SUBSYSTEM_PMUFW_SERIAL_PSU_UART_0_SELECT is not set|'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/workspace/sdbuild/build/edgeboard-fz3b/petalinux_project/project-spec/configs/config
+</code></pre></div>
+<p><strong>旁证</strong>：原作者 <code>@zhutmost</code> <a href="https://github.com/zhutmost/zhutmost-blog/discussions/10">博客评论区</a> <code>@f3rmata</code>（2025-09）在 FZ3A 上复现了同款三行 BL31 卡死，应该是同款坑。</p>
+<p>这不是最终解决方案，执行完后重编译会进入 <strong>坑7</strong></p>
+<h3 id="7-root-panicroot-emmc">坑 7：首启 root 挂载 panic——root= 指向了 eMMC<a class="headerlink" href="#7-root-panicroot-emmc" title="Permanent link">&para;</a></h3>
+<p><strong>现象</strong>：串口可见性修复（坑 6）后，内核日志出现，但
+<code>Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(179,10)</code>，<code>No filesystem could mount root, tried: ext4</code>，且无任何 <code>EXT4-fs</code> / <code>I/O error</code> 行。
+<strong>根因</strong>：FZ3B 是 eMMC + TF 卡双存储板，枚举结果 eMMC = <code>mmcblk0</code>、TF 卡 = <code>mmcblk1</code>。模板默认 bootargs 为 <code>root=/dev/mmcblk0p2</code>——指向 <strong>eMMC 里的出厂分区</strong>（非 ext4），而不是 TF 卡上的 PYNQ rootfs。
+<strong>出处</strong>：PYNQ 官方 <code>sdbuild/boot/meta-pynq/.../pynq_bootargs.dtsi</code> 的默认
+<code>root=/dev/mmcblk0p2</code>（假定 root 在首个 mmc 设备上）；<code>@changhai0109</code> 分发的
+<code>system-user.dtsi</code> 不涉及此文件（其原版仅含 sdhci1 修复）。
+<strong>修复</strong>：§6.3 第二步的 <code>pynq_bootargs.dtsi</code> 修改（<code>root=/dev/mmcblk1p2</code>）。若已跑完
+构建，改完重跑 make 重编 dtb/image.ub，只需把新的 <code>image.ub</code> 拷到 TF 卡 FAT 分区
+覆盖，无需整卡重刷。</p>
+<h2 id="11">11. 参考文献与致谢<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>Haozhe Zhu（@zhutmost），《EdgeBoard 的 PYNQ 移植》，zhutmost.com，
+   https://zhutmost.com/post/pynq-compile （2021）；</li>
+<li>Haozhe Zhu（@zhutmost），《PYNQ v3.1 编译的 Debug 之旅》，zhutmost.com，
+   https://zhutmost.com/post/pynq-compile-2 （2025，2026 更新）；</li>
+<li>Haozhe Zhu（@zhutmost）, @changhai0109, zhutmost/edgeboard 仓库（板卡文件与流程）：https://github.com/zhutmost/edgeboard
+   ——文档以 CC-BY 4.0、代码以 MIT（Copyright (c) 2019 Haozhe Zhu）发布；</li>
+<li>Xilinx PYNQ 仓库 sdbuild 文档（本文 docker/make 命令与版本结论的出处）：
+   https://github.com/Xilinx/PYNQ/blob/master/sdbuild/README.md ；</li>
+<li>AMD UG973（2024.1 Release Notes, Installation and Licensing）。</li>
+</ol>
+<p><strong>版权与致谢</strong>：本系列的移植工作由
+<a href="https://github.com/zhutmost">Haozhe Zhu（@zhutmost）</a>开创，FZ3B 编译流程与预编译镜像由 <a href="https://github.com/changhai0109">Changhai（@changhai0109）</a>贡献。本文是对上述文档与博客的<strong>改编整理</strong>，并补充博主实测内容；原作者未参与本文写作。本文以<a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a> 发布，转载请保留本节署名。</p>
+<blockquote>
+<p>声明：Baidu EdgeBoard 为百度推出的硬件产品；原作者仓库及本文均为个人社区行为，
+与百度/ALINX/MYIR等官方教程无关。</p>
+</blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="上一页: 系列总览">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                系列总览
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../02-flash-and-boot/" class="md-footer__link md-footer__link--next" aria-label="下一页: 移植篇(二) 刷写镜像与首次点亮">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                移植篇(二) 刷写镜像与首次点亮
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Lmy271828
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.top", "navigation.footer", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
